@@ -14,6 +14,8 @@ export const AppContextProvider = ({ children }) => {
     const [state, setState] = useState(null); // Example state
     const [jobs, setJobs] = useState([])
 
+    const [showRecruiterLogin, setShowRecruiterLogin] = useState(false)
+
     //Function to fetch jobs
     const fetchJobs = async () => {
         setJobs(jobsData)
@@ -27,7 +29,8 @@ export const AppContextProvider = ({ children }) => {
         state, setState,
         setSearchFilter, searchFilter,
         isSearched, setIsSearched,
-        jobs, setJobs // Fixed typo
+        jobs, setJobs, // Fixed typo
+        showRecruiterLogin, setShowRecruiterLogin
     };
 
     return (

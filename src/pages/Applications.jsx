@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 import { assets, jobsApplied } from '../assets/assets'
 import moment from 'moment'
 
@@ -37,35 +38,41 @@ const Applications = () => {
       <table className='min-w-full bg-white border rounded-lg'>
         <thead>
           <tr>
-            <th>Company</th>
-            <th>Job Title</th>
-            <th>Location</th>
-            <th>Date</th>
-            <th>Status</th>
+            <th className='py-3 px-4 border-b text-left'>Company</th>
+            <th className='py-3 px-4 border-b text-left'>Job Title</th>
+            <th className='py-3 px-4 border-b text-left max-sm:hidden'>Location</th>
+            <th className='py-3 px-4 border-b text-left'>Date</th>
+            <th className='py-3 px-4 border-b text-left'>Status</th>
           </tr>
         </thead>
         <tbody>
           {jobsApplied.map((job, index) => true ? (
             <tr>
-              <td>
-                <img src={job.logo} alt="" />
+              <td className='py-3 px-4 flex items-center gap-2 border-b'>
+                <img className='w-8 h-8' src={job.logo} alt="" />
                 {job.company}
               </td>
-              <td>
+              <td className='py-2 px-4 border-b'>
                 {job.title}
               </td>
-              <td>
+              <td className='py-2 px-4 border-b max-sm:hidden'>
                 {job.location}
               </td>
-              <td>
+              <td className='py-2 px-4 border-b'>
                 {moment(job.date).format('ll')}
               </td>
-              <td>{job.status}</td>
+              <td className='py-2 px-4 border-b'>
+                <span className={`${job.status === 'Accepted' ? 'bg-green-100' : job.status === 'Rejected' ? 'bg-red-100' : 'bg-blue-100' } px-4 py-1.5 rounded`}>
+                {job.status}
+                </span>
+                </td>
             </tr>
           ) : (null))}
         </tbody>
       </table>
     </div>
+
+    <Footer />
     </>
   )
 }
