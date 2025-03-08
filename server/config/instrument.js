@@ -12,13 +12,16 @@ Sentry.init({
 */
 
 import * as Sentry from "@sentry/node";
-import { Integrations } from "@sentry/tracing";
+import { Mongo } from "@sentry/integrations";
+import { Http } from "@sentry/node/dist/integrations/http";
+
 
 Sentry.init({
-  dsn: "https://c3053de9c053aac7f4ba406473d73315@o4508933036507136.ingest.us.sentry.io/4508933038669824",
+  dsn: process.env.SENTRY_DSN,
   integrations: [
-    new Integrations.Http({ tracing: true }),
-    new Integrations.Mongo({ useMongoose: true })  // ✅ Correct MongoDB integration for Mongoose
+    new Http({ tracing: true }),   // Correct usage for Http
+    new Mongo({ useMongoose: true })  // Correct usage for MongoDB with Mongoose
   ],
   tracesSampleRate: 1.0  // Full tracing for debugging (adjust in production)
 });
+
