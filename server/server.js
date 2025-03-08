@@ -40,52 +40,52 @@ app.listen(PORT, () => {
     console.log(`Server is running on PORT ${PORT}`)
 }) */
 
-import './config/instrument.js';
-import express from 'express';
-import cors from 'cors';
-import 'dotenv/config';
-import connectDB from './config/db.js';
-import * as Sentry from "@sentry/node";
-import { clerkWebhooks } from './controllers/webhooks.js';
-
-const app = express();
-
-Sentry.init({
-  dsn: "https://c3053de9c053aac7f4ba406473d73315@o4508933036507136.ingest.us.sentry.io/4508933038669824",
-  ntegrations: [
-    // Adicionando integração de tracing
-    new Sentry.Integrations.Http({ tracing: true }),
-    new Tracing.Integrations.Express({ app }),
-  ],
-  tracesSampleRate: 1.0
-});
-
-// Sentry Handlers
-app.use(Sentry.Handlers.requestHandler());  // ✅ Método correto para manipulação de requisições
-app.use(Sentry.Handlers.tracingHandler());  // Adicionando o tracing handler
-
-// Middleware
-app.use(cors());
-app.use(express.json({
-    verify: (req, res, buf) => {
-        req.rawBody = buf; // Ensure raw body is captured for webhook verification
-    }
-}));
-
-// Routes
-app.get('/', async (req, res) => {
-    await connectDB();
-    return res.send("API Working");
-});
-
-app.post('/webhooks', async (req, res) => {
-    await connectDB();
-    await clerkWebhooks(req, res);  // ✅ Removed `next()` here to prevent double response
-});
-
-// Error Handler (✅ Correct method for error handling)
-app.use(Sentry.Handlers.errorHandler());
-
-// Port
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`✅ Server running on PORT ${PORT}`));
+    import './config/instrument.js';
+    import express from 'express';
+    import cors from 'cors';
+    import 'dotenv/config';
+    import connectDB from './config/db.js';
+    import * as Sentry from "@sentry/node";
+    import * as Tracing from "@sentry/tracing"; // Adicionando importação necessária
+    import { clerkWebhooks } from './controllers/webhooks.js';
+    
+    const app = express();
+    
+    Sentry.init({
+      dsn: "https://c3053de9c053aac7f4ba406473d73315@o4508933036507136.ingest.us.sentry.io/4508933038669824",
+      integrations: [ // Corrigido "ntegrations" para "integrations"
+        new Sentry.Integrations.Http({ tracing: true }),
+        new Tracing.Integrations.Express({ app }),
+      ],
+      tracesSampleRate: 1.0
+    });
+    
+    // Sentry Handlers - na ordem correta
+    app.use(Sentry.Handlers.requestHandler());
+    app.use(Sentry.Handlers.tracingHandler());
+    
+    // Middleware
+    app.use(cors());
+    app.use(express.json({
+        verify: (req, res, buf) => {
+            req.rawBody = buf;
+        }
+    }));
+    
+    // Routes
+    app.get('/', async (req, res) => {
+        await connectDB();
+        return res.send("API Working");
+    });
+    
+    app.post('/webhooks', async (req, res) => {
+        await connectDB();
+        await clerkWebhooks(req, res);
+    });
+    
+    // Error Handler - deve vir depois das rotas
+    app.use(Sentry.Handlers.errorHandler());
+    
+    // Port
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`✅ Server running on PORT ${PORT}`));
