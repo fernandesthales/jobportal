@@ -17,8 +17,8 @@ import { Integrations } from "@sentry/tracing";
 Sentry.init({
   dsn: "https://c3053de9c053aac7f4ba406473d73315@o4508933036507136.ingest.us.sentry.io/4508933038669824",
   integrations: [
-      new Integrations.Http({ tracing: true }),
-      integrations: [Sentry.mongooseIntegration()]
+    new Integrations.Http({ tracing: true }),
+    new Integrations.Mongo({ useMongoose: true })  // ✅ Correct MongoDB integration for Mongoose
   ],
-  tracesSampleRate: 1.0, // Full tracing for debugging (adjust in production)
+  tracesSampleRate: 1.0  // Full tracing for debugging (adjust in production)
 });
