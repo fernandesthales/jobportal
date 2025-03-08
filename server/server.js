@@ -14,7 +14,11 @@ await connectDB()
 
 //Middlewares
 app.use(cors())
-app.use(express.json())
+app.use(express.json({
+  verify: (req, res, buf) => {
+      req.rawBody = buf.toString(); // Store the raw body for webhook verification
+  }
+}));
 
 //Routes
 app.get('/', (req, res) => res.send("API Working"))
