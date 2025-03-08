@@ -52,11 +52,17 @@ const app = express();
 
 Sentry.init({
   dsn: "https://c3053de9c053aac7f4ba406473d73315@o4508933036507136.ingest.us.sentry.io/4508933038669824",
+  ntegrations: [
+    // Adicionando integração de tracing
+    new Sentry.Integrations.Http({ tracing: true }),
+    new Tracing.Integrations.Express({ app }),
+  ],
   tracesSampleRate: 1.0
 });
 
 // Sentry Handlers
-app.use(Sentry.Handlers.requestHandler());  // ✅ Correct method for request handling
+app.use(Sentry.Handlers.requestHandler());  // ✅ Método correto para manipulação de requisições
+app.use(Sentry.Handlers.tracingHandler());  // Adicionando o tracing handler
 
 // Middleware
 app.use(cors());
