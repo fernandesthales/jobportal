@@ -46,13 +46,18 @@ import cors from 'cors';
 import 'dotenv/config';
 import connectDB from './config/db.js';
 import * as Sentry from "@sentry/node";
-//import { Integrations } from "@sentry/tracing";
+import { requestHandler, errorHandler } from "@sentry/node";
 import { clerkWebhooks } from './controllers/webhooks.js';
 
 const app = express();
 
+Sentry.init({
+  dsn: "https://c3053de9c053aac7f4ba406473d73315@o4508933036507136.ingest.us.sentry.io/4508933038669824",
+  tracesSampleRate: 1.0
+});
+
 // Sentry Handlers
-app.use(Sentry.Handlers.requestHandler());
+app.use(requestHandler());  // Correct method for request handling
 
 // Middleware
 app.use(cors());
@@ -73,8 +78,8 @@ app.post('/webhooks', async (req, res) => {
     await clerkWebhooks(req, res);  // ✅ Removed `next()` here to prevent double response
 });
 
-// Error Handler (Placed AFTER routes)
-app.use(Sentry.Handlers.errorHandler());
+// Error Handler (✅ Correct Import)
+app.use(errorHandler());
 
 // Port
 const PORT = process.env.PORT || 3000;
