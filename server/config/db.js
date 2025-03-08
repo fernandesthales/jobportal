@@ -7,8 +7,8 @@ const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGODB_URI, {
             dbName: "job-portal", // Set database name separately
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
+            //useNewUrlParser: true,
+            //useUnifiedTopology: true,
         });
 
         console.log("✅ Database Connected");
