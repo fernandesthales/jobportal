@@ -11,7 +11,7 @@ Sentry.init({
 
 */
 
-import Sentry from "@sentry/node";
+import * as Sentry from "@sentry/node";
 import { Integrations } from "@sentry/tracing";
 
 Sentry.init({
