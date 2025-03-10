@@ -11,11 +11,11 @@ Sentry.init({
 
 */
 
+// Import with `import * as Sentry from "@sentry/node"` if you are using ESM
 import * as Sentry from "@sentry/node";
 
+//const Sentry = require("@sentry/node");
 
 Sentry.init({
-  dsn: "https://c3053de9c053aac7f4ba406473d73315@o4508933036507136.ingest.us.sentry.io/4508933038669824",
-  tracesSampleRate: 1.0  // Full tracing for debugging (adjust in production)
+  dsn: "https://2ee487093100280c015534308f7ee320@o4508933036507136.ingest.us.sentry.io/4508955664842752",
 });
-
