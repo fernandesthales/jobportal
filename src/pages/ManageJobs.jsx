@@ -1,11 +1,64 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import { manageJobsData } from '../assets/assets'
 import moment from 'moment'
 import { useNavigate } from 'react-router-dom'
+import { AppContext } from '../context/AppContext'
+import { useState } from 'react';     // ✅ Import useState
+import axios from 'axios';           // ✅ Import axios
+import { toast } from 'react-toastify';  // ✅ Import toast for better error handling
 
 const ManageJobs = () => {
 
   const navigate = useNavigate();
+
+  const [jobs, setJobs] = useState([]);
+  const {backendUrl, companyToken} = useContext(AppContext)
+
+  // Function to fetch company Job Applications Data
+  const fetchCompanyJobs = async () => {
+
+    try {
+      const {data} = await axios.get(backendUrl + '/api/company/list-jobs', 
+        {headers: {token: companyToken}}
+      )
+
+      if (data.success) {
+        setJobs(data.jobsData.reverse())
+        console.log(data.jobsData)
+      } else{
+        toast.error(data.message)
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Unknown error occurred';
+      toast.error(errorMessage);
+    }
+
+  }
+
+  //Function to change Job Visibility
+  const changeJobVisibility = async (id) => {
+    try {
+      const {data} = await axios.post(backendUrl + '/api/company/change-visibility',
+        {id},
+        {headers: {token: companyToken}}
+      )
+
+      if (data.success) {
+       toast.success(data.message)
+       fetchCompanyJobs()
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
+
+  useEffect(() => {
+    if (companyToken) {
+      fetchCompanyJobs()
+    }
+  }, [companyToken])
   
   return (
     <div className='container p-4 max-w-5xl'>
@@ -22,7 +75,7 @@ const ManageJobs = () => {
           </tr>
           </thead>
           <tbody>
-            {manageJobsData.map((job, index) => (
+            {jobs.map((job, index) => (
               <tr key={index} className='text-gray-700'>
                 <td className='py-2 px-4 border-b max-sm:hidden'>{index}</td>
                 <td className='py-2 px-4 border-b'>{job.title}</td>
@@ -30,7 +83,7 @@ const ManageJobs = () => {
                 <td className='py-2 px-4 border-b max-sm:hidden'>{job.location}</td>
                 <td className='py-2 px-4 border-b text-center'>{job.applicants}</td>
                 <td className='py-2 px-4 border-b'>
-                  <input className='scale-125 ml-4' type="checkbox" name="" id="" />  
+                  <input onChange={() => changeJobVisibility(job._id)} className='scale-125 ml-4' type="checkbox" checked={job.visible} name="" id="" />  
                 </td>
               </tr>
             ))}

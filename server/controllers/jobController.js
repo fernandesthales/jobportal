@@ -18,7 +18,8 @@ export const getJobs = async (req, res) => {
 
 // Get a single job by ID
 export const getJobById = async (req, res) => {
-    try {
+
+      try {
         const { id } = req.params;
 
         // ✅ Check for valid MongoDB ObjectId format
