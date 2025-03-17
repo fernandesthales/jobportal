@@ -64,13 +64,16 @@ export const AppContextProvider = ({ children }) => {
     }
 
     //Function to fetch user data
-    /*
+
     const fetchUserData = async () => {
         try {
             const token = await getToken()
 
             const {data} = await axios.get(backendUrl + '/api/users/user', 
-                {headers: {Authorization: `Bearer ${token}`}});
+                
+                {
+                    method: 'GET',
+                    headers: {Authorization: `Bearer ${token}`}});
 
             if (data.success) {
                 setUserData(data.user)
@@ -82,54 +85,9 @@ export const AppContextProvider = ({ children }) => {
             toast.error(error.message)
             console.log(error)
         }
-    } */
+    }
 
-    const fetchUserData = async () => {
-            try {
-                
-                const token = await getToken();
-                console.log("Token received from getToken():", token);
-                if (!user) {
-                    console.log("Usuário não autenticado");
-                    return;
-                }
-                    
-                if (!token) {
-                    console.log("Token não encontrado");
-                    toast.error("Token de autorização não encontrado");
-                    return;
-                } else {
-                    console.log("Token encontrado:", token);
-                }
         
-                const response = await axios.get(`${backendUrl}/api/users/user`, {
-                    headers: { Authorization: `Bearer ${token}` }, // Include the session token as a Bearer token in the Authorization header
-                  });
-        
-                const { data } = response;
-                
-                if (data.success) {
-                    console.log("Dados do usuário recebidos:", data.user);
-                    setUserData(data.user);
-                } else {
-                    console.log("Erro na resposta:", data);
-                    toast.error(data.message || "Erro ao buscar dados do usuário");
-                }
-            } catch (error) {
-                console.error("Erro completo:", error);
-                
-                if (error.response) {
-                    console.log("Erro do servidor:", error.response.data);
-                    toast.error(error.response.data?.message || "Erro do servidor");
-                } else if (error.request) {
-                    console.log("Sem resposta do servidor");
-                    toast.error("Servidor não respondeu");
-                } else {
-                    console.log("Erro na configuração:", error.message);
-                    toast.error("Erro na configuração da requisição");
-                }
-            }
-        };
         
 
     useEffect(() => {
@@ -154,12 +112,18 @@ export const AppContextProvider = ({ children }) => {
         }
     }, [user]) */
 
-    useEffect(() => {
-        if (isLoaded && user && !userData) {
-            console.log("Tentando buscar dados do usuário...");
-            fetchUserData();
-        }
-    }, [isLoaded, user]);
+   // Atualize o useEffect para melhor controle
+useEffect(() => {
+    if (isLoaded && user && !userData) {
+        console.log("Iniciando busca de dados do usuário...");
+        console.log("Status do usuário:", {
+            isLoaded,
+            userId: user?.id,
+            hasUserData: !!userData
+        });
+        fetchUserData();
+    }
+}, [isLoaded, user]);
 
     const value = {
         state, setState,

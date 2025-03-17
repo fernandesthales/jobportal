@@ -1,6 +1,5 @@
 import Company from '../models/Company.js';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import cloudinary from 'cloudinary';
 import generateToken from '../utils/generateToken.js';
 import { config } from 'dotenv';
