@@ -6,12 +6,9 @@ import {v2 as cloudinary} from 'cloudinary';
 
 // Get user Data
 export const getUserData = async (req, res) => {
-    console.log("Received req.auth:", req.auth);  // ✅ Add this to inspect req.auth
-    const userId = req.auth?.userId;
-    if (!userId) {
-        return res.status(401).json({ success: false, message: "Unauthorized access" });
-    }
     
+    const userId = req.auth.userId;
+      
     try {
         const user = await User.findById(userId);
 
@@ -84,7 +81,7 @@ export const updateUserResume = async (req, res) => {
 
     try {
         const userId = req.auth.userId;
-        const resumeFile = req.resumeFile
+        const resumeFile = req.file
 
         const userData = await User.findById(userId)
 

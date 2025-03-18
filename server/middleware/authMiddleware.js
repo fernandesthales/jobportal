@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import Company from '../models/Company.js';
-import User from '../models/User.js';
+import { ClerkExpressWithAuth } from "@clerk/clerk-sdk-node";
 
 export const protectCompany = async (req, res, next) => {
     const token = req.headers.token;
@@ -19,40 +19,19 @@ export const protectCompany = async (req, res, next) => {
 }
 
 
-export const protectUser = async (req, res, next) => {
-    const authHeader = req.headers.authorization;
+//Clerk Middleware for User
+export const protectUser = ClerkExpressWithAuth({
+    onAuthSuccess: (req, res, next) => {
+        console.log("✅ Clerk Token Verified Successfully");
+        console.log("Decoded Token Data:", req.auth);
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.log("❌ No token found in headers");
-        return res.status(401).json({ success: false, message: 'Not Authorized - No Token' });
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // ✅ Ensure it's a user token
-        if (decoded.type !== 'user') {
-            return res.status(403).json({ success: false, message: 'Invalid token type for user' });
-        }
-
-        console.log("✅ Decoded Token in Middleware:", decoded);
-
-        req.auth = { userId: decoded.id };
-
-        const user = await User.findById(decoded.id).select('-password');
-
-        if (!user) {
-            console.log("❌ User not found in database");
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-
-        req.user = user;  // Optional: Attach full user data
+        // Extract the user ID from `sub`
+        req.auth = { userId: req.auth.sub };
         next();
-    } catch (error) {
-        console.error("❌ JWT Error:", error.message);
-        return res.status(403).json({ success: false, message: 'Invalid token' });
+    },
+    onAuthFailed: (req, res) => {
+        console.error("❌ Clerk Token Verification Failed");
+        res.status(401).json({ success: false, message: "Unauthorized - Invalid Token" });
     }
-};
+});
 

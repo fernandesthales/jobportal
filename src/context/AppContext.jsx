@@ -63,31 +63,68 @@ export const AppContextProvider = ({ children }) => {
         }
     }
 
-    //Function to fetch user data
-
-    const fetchUserData = async () => {
-        try {
-            const token = await getToken()
-
-            const {data} = await axios.get(backendUrl + '/api/users/user', 
-                
-                {
-                    method: 'GET',
-                    headers: {Authorization: `Bearer ${token}`}});
-
-            if (data.success) {
-                setUserData(data.user)
-                } else {
-                toast.error(data.message) 
-                console.log(error)
+      const fetchUserData = async () => {
+            try {
+                if (!isLoaded || !user) {
+                    console.log("⚠️ Usuário não está pronto ainda");
+                    return;
                 }
-        } catch (error) {
-            toast.error(error.message)
-            console.log(error)
-        }
-    }
-
         
+                const token = await getToken();
+        
+                if (!token) {
+                    console.log("❌ Token não obtido");
+                    toast.error("Falha na autenticação");
+                    return;
+                }
+        
+                console.log("🔑 Token:", token);
+        
+                try {
+                    const response = await axios.get(`${backendUrl}/api/users/user`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+        
+                    if (response.data.success) {
+                        console.log("✅ Dados do usuário:", response.data.user);
+                        setUserData(response.data.user);
+                    } else {
+                        throw new Error(response.data.message || "Erro na resposta do servidor");
+                    }
+                } catch (error) {
+                    if (error.response?.status === 401) {
+                        console.log("❌ Token inválido ou expirado");
+                        toast.error("Sessão expirada. Faça login novamente.");
+                    } else {
+                        console.error("❌ Erro na requisição:", error);
+                        toast.error("Erro ao buscar dados do usuário");
+                    }
+                }
+            } catch (error) {
+                console.error("❌ Erro geral:", error);
+                toast.error("Erro ao processar requisição");
+            }
+        };
+
+        //Function to fetch user applications
+        const fetchUserApplications = async () => {
+            try {
+                const token = await getToken()
+                const {data} = await axios.get(backendUrl + '/api/users/applications', 
+                    {headers: {Authorization: `Bearer ${token}`}}
+                )
+                if (data.success) {
+                    setUserApplications(data.applications)
+                } else {
+                    toast.error(data.message)
+                }
+            } catch (error) {
+                toast.error(error.message)
+            }
+        }
         
 
     useEffect(() => {
@@ -113,17 +150,18 @@ export const AppContextProvider = ({ children }) => {
     }, [user]) */
 
    // Atualize o useEffect para melhor controle
-useEffect(() => {
-    if (isLoaded && user && !userData) {
-        console.log("Iniciando busca de dados do usuário...");
-        console.log("Status do usuário:", {
-            isLoaded,
-            userId: user?.id,
-            hasUserData: !!userData
-        });
-        fetchUserData();
-    }
-}, [isLoaded, user]);
+    useEffect(() => {
+        if (isLoaded && user && !userData) {
+            console.log("Iniciando busca de dados do usuário...");
+            console.log("Status do usuário:", {
+                isLoaded,
+                userId: user?.id,
+                hasUserData: !!userData
+            });
+            fetchUserData();
+            fetchUserApplications();
+        }
+    }, [isLoaded, user]);
 
     const value = {
         state, setState,
@@ -135,7 +173,9 @@ useEffect(() => {
         companyData, setCompanyData,
         backendUrl,
         userData, setUserData,
-        userApplications, setUserApplications
+        userApplications, setUserApplications,
+        fetchUserData,
+        fetchUserApplications
     };
 
     return (
